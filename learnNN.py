@@ -130,27 +130,26 @@ class ReLU_layer(Layer):
             self.input_errors[i] = out_errors[i] if self.input_values[i]>0 else 0
         return self.input_errors
 
+# had to change this class as sigmoid is not defined and wolud not run on asssignment8 script
 class Sigmoid_layer(Layer):
-    """sigmoids of the inputs.
-    The number of outputs is equal to the number of inputs. 
-    Each output is the sigmoid of its corresponding input.
-    """
+    """Sigmoid activation f(z) = 1 / (1 + exp(-z)). One output per input."""
     def __init__(self, nn):
         Layer.__init__(self, nn)
 
     def output_values(self, input_values, training=False):
-        """Returns the outputs for the input values.
-        It remembers the output values for the backprop.
-        """
-        for i in range(self.num_inputs):
-            self.outputs[i] = sigmoid(out_errors[i])
+        # forward pass uses inputs, not out_errors
+        # remember outputs for backprop derivative s * (1 - s)
+        self.outputs = [sigmoid(z) for z in input_values]
         return self.outputs
 
-    def backprop(self,errors):
-        """Returns the derivative of the errors"""
+    def backprop(self, out_errors):
+        # out_errors = dL/dy; dy/dz = s*(1-s) with s = sigmoid(z)
         for i in range(self.num_inputs):
-            self.input_errors[i] = input_values[i]*out_errors[i]*(1-out_errors[i])
+            s = self.outputs[i]
+            self.input_errors[i] = out_errors[i] * s * (1 - s)
         return self.input_errors
+
+
 
 class NN(Learner):
     def __init__(self, dataset, optimizer=None, **hyperparms):

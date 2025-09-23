@@ -11,7 +11,7 @@
 from display import Displayable 
 from agentMiddle import Rob_middle_layer
 from agents import Agent, Environment
-from agentEnv import Rob_body, World
+
 import math
 
 class Rob_top_layer(Agent, Environment):
@@ -48,8 +48,7 @@ class Opportunistic_top_layer(Rob_top_layer):
             # choose nearest location
             closest = min(
                 unvisited,
-                key=lambda loc: self.distance(current_position, self.world.locations[loc])
-            )
+                key=lambda loc: self.distance(current_position, self.world.locations[loc]))
             unvisited.remove(closest)
 
             # move there
@@ -61,9 +60,9 @@ class Opportunistic_top_layer(Rob_top_layer):
             current_position = self.world.agent_pos
 
 
-def rob_ex(use_opportunistic=False):
+def rob_ex(strategy="original"):
     """Example setup function.
-    Pass use_opportunistic=True to test opportunistic controller.
+    strategy can be: 'original', 'opportunistic', 'greedy'
     """
     global world, body, middle, top
     world = World(
@@ -77,18 +76,54 @@ def rob_ex(use_opportunistic=False):
     )
     body = Rob_body(world)
     middle = Rob_middle_layer(body)
-    if use_opportunistic:
+
+    if strategy == "opportunistic":
         top = Opportunistic_top_layer(middle, world)
+    elif strategy == "greedy":
+        top = Greedy_top_layer(middle, world)
     else:
         top = Rob_top_layer(middle, world)
 
-    top.do({'visit':['o109','storage','o109','o103']})
+    top.do({'visit':['o109','storage','o103']})
+
+
+class Greedy_top_layer(Rob_top_layer):
+    """Greedy controller (part d):
+    At every step, head toward whichever target is currently closest.
+    """
+    def distance(self, p1, p2):
+        return math.sqrt((p1[0]-p2[0])**2 + (p1[1]-p2[1])**2)
+
+    def do(self, plan):
+        targets = plan['visit'][:]
+        
+        # while there are still targets left
+        while targets:
+            # get current position (robot body tracks this in the world)
+            current_position = self.world.agent_pos
+
+            # pick closest target right now
+            closest = min(
+                targets,
+                key=lambda loc: self.distance(current_position, self.world.locations[loc]))
+            goal_pos = self.world.locations[closest]
+
+            # only take a small step toward it each iteration
+            arrived = self.lower.do({'go_to': goal_pos, 'timeout': 1})
+            self.display(2, "Step toward", closest, arrived)
+
+            # check if we reached the goal location
+            if self.world.agent_pos == goal_pos:
+                targets.remove(closest)
+                self.display(1, "Reached", closest)
+
 
 
 if __name__ == "__main__":
     rob_ex()
-    print("Try: rob_ex(use_opportunistic=True) for opportunistic behavior")
-    print("Or: top.do({'visit':['o109','storage','o109','o103']})")
+    print("Try: rob_ex('opportunistic') for opportunistic behavior")
+    print("Try: rob_ex('greedy') for greedy behavior")
+ 
 
 
 # Robot Trap for which the current controller cannot escape:
