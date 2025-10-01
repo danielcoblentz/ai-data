@@ -1,0 +1,1 @@
+this is a rerun of the alexnet model with no changes testing if hte initial test was an error

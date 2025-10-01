@@ -1,0 +1,203 @@
+ALexNet with different learning rates and their effects:
+Summary of Observations by Learning Rate:
+Learning Rate = 0.01
+
+Training Accuracy: Stayed around 9-10% throughout all epochs.
+Validation Accuracy: Stayed around 9-10% throughout all epochs.
+Loss: The loss values are extremely high and did not decrease significantly.
+Analysis:
+
+This high learning rate is too aggressive, causing the optimizer to overshoot the minimum loss repeatedly.
+The model is essentially stuck and unable to converge, which is indicated by the low accuracy and minimal change in loss values.
+Conclusion: This learning rate is too high for your model, resulting in unstable and ineffective training.
+Learning Rate = 0.001
+
+Training Accuracy: Around 9-10%, very similar to the results at 0.01.
+Validation Accuracy: Stayed at around 9-10%.
+Loss: Loss values stayed consistently around 2.303, which is indicative of the model not learning.
+Analysis:
+
+Although this learning rate is lower than 0.01, it is still not allowing the model to learn properly.
+This can be due to an issue with initialization or vanishing gradients, which might suggest that even 0.001 is too high for this network’s current configuration.
+Conclusion: This learning rate is still too high or there may be a separate issue with your model architecture.
+Learning Rate = 0.0001
+
+Training Accuracy: Quickly increased to around 99% after a few epochs.
+Validation Accuracy: Reached 99% after a few epochs.
+Loss: Validation loss decreased steadily to very low values (close to 0).
+Analysis:
+
+This learning rate is ideal for your model configuration. The model is learning effectively, and the accuracy is very high.
+However, towards the end, the model started to overfit slightly, as seen in the increased training accuracy and a slight increase in validation loss.
+Conclusion: This learning rate produces optimal results. Consider early stopping or reducing the number of epochs to prevent overfitting.
+Learning Rate = 0.00001
+
+Training Accuracy: Improved slowly, reaching above 98% after 10 epochs.
+Validation Accuracy: Reached a high of ~99% by the 10th epoch.
+Loss: The loss values reduced steadily but slowly.
+Analysis:
+
+This learning rate is very low, causing the model to train slowly but steadily.
+Even though it achieves good results, the model might take much longer to converge compared to the learning rate of 0.0001.
+Conclusion: This learning rate is too low for your current training duration. You would need to increase the number of epochs to reach optimal results.
+Recommendations Based on Your Results:
+Ideal Learning Rate:
+Based on your experiments, the learning rate of 0.0001 seems to be the best choice, as it achieves the highest accuracy on both training and validation sets without being excessively slow.
+
+Further Optimization:
+
+Use early stopping to prevent overfitting with the learning rate of 0.0001.
+You can also try reducing the number of epochs to around 6-7, since the validation accuracy started to plateau around the 6th epoch.
+Potential Issues to Investigate for Higher Learning Rates (0.01, 0.001):
+
+Check for issues with the weight initialization or vanishing gradients.
+Consider adding Batch Normalization layers after each convolutional layer to stabilize training.
+What To Include in Your Presentation:
+For your presentation, you can include the following comparisons:
+
+Validation Accuracy vs. Epochs for Each Learning Rate:
+
+Create a line plot to show how each learning rate affects validation accuracy over the 10 epochs.
+Highlight that a learning rate of 0.0001 achieved the highest and most stable accuracy.
+Convergence Speed:
+
+Point out how the model with 0.0001 converged quickly, while 0.00001 took longer.
+Show that 0.01 and 0.001 failed to converge, indicating the need for careful learning rate selection.
+Confusion Matrices for Each Learning Rate (Optional):
+
+If possible, show confusion matrices to indicate how the model performs on each class.
+This can illustrate whether a high learning rate caused random predictions or if a low learning rate missed specific classes.
+Conclusion and Recommendations:
+
+Based on the results, recommend using a learning rate of 0.0001.
+Suggest early stopping or fine-tuning the model further to achieve even better generalization.
+
+Overall results:
+0.01 (Too high, resulted in poor accuracy and no learning)
+0.001 (Also too high, no meaningful learning)
+0.0001 (Best results with high accuracy and steady learning)
+0.00001 (Good accuracy but slower convergence)
+
+
+----------------
+testing this code:implement Early Stopping and Batch Normalization:
+!pip install patool==1.12
+
+# Import necessary libraries
+import tensorflow as tf
+import matplotlib.pyplot as plt
+from google.colab import drive
+import patoolib
+
+# Mount Google Drive
+drive.mount('/content/drive')
+
+# Define the directory containing the dataset
+data_dir = '/content/extracted_images/leapGestRecog'
+
+# Load the dataset and assign labels based on folder names
+train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    data_dir,  # Path to the main dataset directory
+    validation_split=0.3,  # Reserve 30% for validation
+    subset="training",  # Use "training" for the training set
+    seed=123,  # Seed for reproducibility
+    image_size=(227, 227),  # Resize images to 227x227 pixels (AlexNet input size)
+    batch_size=32,  # Load images in batches of 32
+    label_mode='categorical'  # Use categorical labels (one-hot encoded)
+)
+
+validation_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+    data_dir,  # Path to the main dataset directory
+    validation_split=0.3,  # Reserve 30% for validation
+    subset="validation",  # Use "validation" for the validation set
+    seed=123,  # Seed for reproducibility
+    image_size=(227, 227),  # Resize images to 227x227 pixels (AlexNet input size)
+    batch_size=32,  # Load images in batches of 32
+    label_mode='categorical'  # Use categorical labels (one-hot encoded)
+)
+
+# Display class names to verify labels
+class_names = train_dataset.class_names
+print("Class Names:", class_names)
+
+# Updated AlexNet model with Batch Normalization layers
+def build_alexnet(input_shape=(227, 227, 3), num_classes=len(class_names)):
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.Conv2D(96, (11, 11), strides=4, activation='relu', input_shape=input_shape),
+        tf.keras.layers.BatchNormalization(),  # Added Batch Normalization
+        tf.keras.layers.MaxPooling2D((3, 3), strides=2),
+
+        tf.keras.layers.Conv2D(256, (5, 5), padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),  # Added Batch Normalization
+        tf.keras.layers.MaxPooling2D((3, 3), strides=2),
+
+        tf.keras.layers.Conv2D(384, (3, 3), padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),  # Added Batch Normalization
+        tf.keras.layers.Conv2D(384, (3, 3), padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),  # Added Batch Normalization
+        tf.keras.layers.Conv2D(256, (3, 3), padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),  # Added Batch Normalization
+        tf.keras.layers.MaxPooling2D((3, 3), strides=2),
+
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(4096, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+
+        tf.keras.layers.Dense(4096, activation='relu'),
+        tf.keras.layers.Dropout(0.5),
+
+        tf.keras.layers.Dense(num_classes, activation='softmax')
+    ])
+    return model
+
+# Learning rates to experiment with
+learning_rates = [0.01, 0.001, 0.0001, 0.00001]
+
+# Dictionary to store the results for each learning rate
+results_lr = {}
+
+# Implement Early Stopping to avoid overfitting
+early_stopping = tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True)
+
+# Train and evaluate the model for each learning rate
+for lr in learning_rates:
+    print(f"\nTraining with Learning Rate = {lr}\n")
+    
+    # Create a new model instance for each learning rate
+    alexnet_model = build_alexnet()
+    
+    # Compile model with the specific learning rate
+    alexnet_model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=lr), loss='categorical_crossentropy', metrics=['accuracy'])
+    
+    # Train the model with Early Stopping
+    history = alexnet_model.fit(
+        train_dataset,
+        validation_data=validation_dataset,
+        epochs=10,  # Change this value based on your requirements
+        callbacks=[early_stopping],  # Include Early Stopping
+        verbose=1
+    )
+    
+    # Evaluate the model on the validation set
+    val_loss, val_acc = alexnet_model.evaluate(validation_dataset, verbose=2)
+    
+    # Store the final validation accuracy for the learning rate
+    results_lr[lr] = val_acc
+    print(f"Validation accuracy for Learning Rate = {lr}: {val_acc:.4f}")
+
+# Print out validation accuracy for each learning rate
+print("\nValidation accuracy for different learning rates:")
+for lr, acc in results_lr.items():
+    print(f"Learning Rate = {lr}: Validation Accuracy = {acc:.4f}")
+
+# Plot validation accuracy for each learning rate
+plt.figure(figsize=(10, 6))
+plt.plot(list(results_lr.keys()), list(results_lr.values()), marker='o')
+plt.xlabel('Learning Rate')
+plt.ylabel('Validation Accuracy')
+plt.title('Validation Accuracy for Different Learning Rates')
+plt.xscale('log')  # Use logarithmic scale for better visualization
+plt.show()
+
+
+reslults stored as V2

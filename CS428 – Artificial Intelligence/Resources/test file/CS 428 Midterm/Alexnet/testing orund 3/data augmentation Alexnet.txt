@@ -1,0 +1,23 @@
+Data augmentation on Alexnet using shifts, rotate, horixzontal flip and zoom
+changes:
+
+Key Changes Implemented:
+Preprocessing Single Image:
+
+Defined preprocess_image() function to preprocess individual images.
+Data Augmentation with ImageDataGenerator:
+
+Applied rotation, zoom, horizontal flip, width/height shifts, and shear transformations.
+Used fill_mode='nearest' to handle empty pixels generated during transformations.
+Training and Evaluation:
+
+Replaced the training dataset with train_dataset_augmented.
+The validation dataset uses rescaling without augmentation.
+
+
+code:
+
+
+
+
+Results:

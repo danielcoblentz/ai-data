@@ -1,0 +1,1 @@
+no changes were made to the model just split hte data into 70 / 30 and changed the size to match the model
