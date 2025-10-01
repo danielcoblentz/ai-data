@@ -14,12 +14,8 @@ Files added:
 How to run the examples (PowerShell):
 
 # create the sqlite DB and run the SQLAlchemy example
-cd "c:\Users\dan\Desktop\ai-data\CS329 – Intro to DBMS\examples\python"
-python sqlalchemy_example.py
+
 
 # run the SQL files using the runner
 python sql_examples.py
 
-Notes:
-- These examples use SQLite for simplicity so they should run without installing a database server.
-- If you'd like Postgres/Docker examples, say so and I'll add them.

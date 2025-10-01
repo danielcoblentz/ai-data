@@ -16,6 +16,3 @@ How to run the examples
 
 Most SQL examples use SQLite and can be run with the builtin `sqlite3` CLI or via Python's `sqlite3` module. The `examples/python` folder contains small Python scripts that create and query an example DB.
 
-Contact
-
-If you want additional materials (Postgres docker-compose, interactive notebooks, autograders) tell me which and I can add them.
